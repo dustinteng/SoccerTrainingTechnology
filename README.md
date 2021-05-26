@@ -28,4 +28,8 @@ to send processed data to the server.
 for more information nad installation guide:
 https://docs.google.com/document/d/1EVNy_LIREYyp7GDx8j_NQBbI-WlBfLbGkiVTWoDLeMo/edit?usp=sharing
 
+Soccer Training Technology slides:
+https://docs.google.com/presentation/d/1WJeTxafk6OPaCWprCv8mL-XlOi77bTMuOI8XcK3qw44/edit?usp=sharing
+
+
 Date: May 26 2021
