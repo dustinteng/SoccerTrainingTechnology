@@ -1,19 +1,17 @@
 # SoccerTrainingTechnology
 
-Soccer Training Technology
+Background
+Soccer Training Technology started as a Jan Dustin Tengdyantono's MAE 199 research class project with Professor Jack Silberman and Professor Mauricio de Oliveira. Nevertheless, STT is now the newest research field / framework at UCSD's Triton AI club. STT is currently focused in the improvement and development of it's realtime pose detection and user's location during assessments while processing and obtaining meaningful data (Beta).
 
+Introduction
 The Soccer Training Technology is a unique project to revolutionize soccer training with the help of technology. 
 The Project goal is to be a part of the technological advancement in soccer with the hope that it will act 
-as a catalyst in the technological development in the overall sports area. STT’s main objective is to analyze, store, 
-and compare assessments from different users. Not stopping there, STT’s goal is to be able to also make more meaningful
-personalized data for individuals based on their performance on different tries of the same assessment over time; 
-1. are their numbers better? 
-2. How fast is their improvement in comparison to others? 
-3. What is their current ranking / ratings? 
-
+as a catalyst in the technological development in the overall sports area. STT’s main objective is to analyze, store, and compare assessments from different users. Not stopping there, STT’s goal is to be able to also make more meaningful personalized data for individuals based on their performance on different tries of the same assessment over time; 
+  1. are their numbers better? 
+  2. How significant is their improvement in comparison to others? 
+  3. What is their current ranking / ratings ? 
 STT is developed to be a very good tool to improve any aspects of soccer STT can provide 
 (developing more assessments that assess different aspects of soccer; touch, dribble, decision making, accuracy, pace, distance, etc). 
-
 
 Considering the complexity of the project, STT was started on the minimum viable product, Beta. 
 Beta is a soccer training framework that is purposely designed for development and further integration. 
@@ -27,7 +25,7 @@ Beta is a framework that processes everything needed from checking camera feed, 
 object detection, pose estimation, processing real time data, generating transcript and eventually 
 to send processed data to the server.
 
-for more information:
+for more information nad installation guide:
 https://docs.google.com/document/d/1EVNy_LIREYyp7GDx8j_NQBbI-WlBfLbGkiVTWoDLeMo/edit?usp=sharing
 
-Date: May 24 2021
+Date: May 26 2021
