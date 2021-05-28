@@ -25,7 +25,7 @@ Beta is a framework that processes everything needed from checking camera feed, 
 object detection, pose estimation, processing real time data, generating transcript and eventually 
 to send processed data to the server.
 
-for more information nad installation guide:
+for more information and installation guide:
 https://docs.google.com/document/d/1EVNy_LIREYyp7GDx8j_NQBbI-WlBfLbGkiVTWoDLeMo/edit?usp=sharing
 
 Soccer Training Technology slides:
