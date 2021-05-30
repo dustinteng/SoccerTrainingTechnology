@@ -1,5 +1,6 @@
 import wx
 import cv2 as cv
+import matplotlib
 import numpy
 
 class MyApp(wx.App):
@@ -13,7 +14,7 @@ class MyFrame(wx.Frame):
     def __init__(self,parent,title):
         super(MyFrame, self).__init__(parent, title=title)
 
-        panel = MainMenu(self)
+        panel = TrainingPanel(self)
 
 class MainMenu(wx.Panel):
     def __init__(self, parent):
@@ -94,6 +95,88 @@ class MainMenu(wx.Panel):
         print('Calibrating... ')
         print('Calibrating... ')
         print('Calibrating Complete!')
+
+
+class TrainingPanel(wx.Panel):
+    def __init__(self, parent):
+        super(TrainingPanel, self).__init__(parent)
+
+        titleText = wx.StaticText(self, wx.ID_ANY, 'Pace Training')
+
+        self.cam = cv.VideoCapture(0)
+        ret, img = self.cam.read()
+
+        length, height = img.shape[:2]
+        parent.SetSize(length,height)
+        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+        self.bmp = wx.BitmapFromBuffer(length,height,img)
+
+        self.timer = wx.Timer(self)
+        self.timer.Start(1000./60)
+
+        self.Bind(wx.EVT_PAINT, self.onPaint)
+        self.Bind(wx.EVT_TIMER, self.nextFrame)
+
+        convoOutput = wx.StaticText(self, wx.ID_ANY,'Press OK to Begin')
+        convoBtn = wx.Button(self, wx.ID_ANY, 'OK')
+        self.Bind(wx.EVT_BUTTON, self.onOK, convoBtn)
+
+        yesBtn = wx.Button(self, wx.ID_ANY, 'Yes')
+        self.Bind(wx.EVT_BUTTON, self.onYes, yesBtn)
+        noBtn = wx.Button(self, wx.ID_ANY, 'No')
+        self.Bind(wx.EVT_BUTTON, self.onNo, noBtn)
+        
+        mainBox = wx.BoxSizer(wx.VERTICAL)
+        titleBox = wx.BoxSizer(wx.HORIZONTAL)
+        displayBox = wx.BoxSizer(wx.HORIZONTAL)
+        convoBox = wx.BoxSizer(wx.HORIZONTAL)
+        buttonBox = wx.BoxSizer(wx.HORIZONTAL)
+
+        titleBox.Add(titleText, 0, wx.ALL, 5)
+
+        displayBox.Add(self.bmp, 0, wx.ALL, 5)
+        
+        convoBox.Add(convoOutput, 0, wx.ALL, 5)
+        convoBox.Add(convoBtn, 0, wx.ALL, 5)
+
+        buttonBox.Add(yesBtn, 0, wx.ALL, 5)
+        buttonBox.Add(noBtn, 0, wx.ALL, 5)
+
+        mainBox.Add(titleBox, 0, wx.CENTER)
+        mainBox.Add(wx.StaticLine(self,), 0, wx.ALL|wx.EXPAND, 5)
+        mainBox.Add(displayBox, 0, wx.CENTER)
+        mainBox.Add(convoBox, 0, wx.CENTER)
+        mainBox.Add(buttonBox, 0, wx.CENTER)
+
+        self.SetSizer(mainBox)
+        mainBox.Fit(self)
+        self.Layout()
+
+    def onPaint(self,event):
+        dc = wx.BufferedPaintDC(self)
+        dc.DrawBitmap(self.bmp,0,0)
+
+
+    def nextFrame(self,event):
+        ret, img = self.cam.read()
+        if ret:
+            img = cv2.cvtColor(img, cv.COLOR_BGR2RGB)
+            self.bmp.CopyFromBuffer(img)
+            self.Refresh()
+
+    def onOK(self,event):
+        #do something
+        
+        return
+
+    def onYes(self,event):
+        #do something
+        return
+    
+    def onNo(self,event):
+        #do something
+        return
+            
 
 app = MyApp()
 app.MainLoop()
