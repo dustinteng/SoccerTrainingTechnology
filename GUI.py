@@ -5,34 +5,41 @@ import numpy
 
 class MyApp(wx.App):
     def OnInit(self):
-        self._MM = MyFrameMainMenu()
-        self._TM = MyFrameTraining(self._MM)
+        self.frame = MyFrame(parent = None, title = "Main Menu")
         self.frame.Show()
 
         return True
 
-class MyFrameMainMenu(wx.Frame):
-    #womdoawmoaodawd stuck hereeeeeeeeeeeeeeee
-    def __init__(self):
-        super(MyFrameMainMenu, self).__init__(parent = None, title= "Main Menu")
-        self._main_menu_panel = MainMenu(self)
+class MyFrame(wx.Frame):
+    def __init__(self,parent,title):
+        super(MyFrame, self).__init__(parent, title=title)
 
-class MyFrameTraining(wx.Frame):
-    #womdoawmoaodawd stuck hereeeeeeeeeeeeeeee
-    def __init__(self, parent):
-        super(MyFrameTraining, self).__init__(parent = parent, title= "Training ")
-        self._training_panel = TrainingPanel(self)
+        self._mainmenu = MainMenu(self)
+        self._trainingmenu = TrainingPanel(self)
+        self._trainingmenu.Hide()
+
+    def onSwitchPanels(self, event):
+        """"""
+        if self._mainmenu.IsShown():
+            self.SetTitle("Training Menu Showing")
+            self._mainmenu.Hide()
+            self._trainingmenu.Show()
+        else:
+            self.SetTitle("Main Menu Showing")
+            self._mainmenu.Show()
+            self._trainingmenu.Hide()
+        self.Layout()
 
 class MainMenu(wx.Panel):
     def __init__(self, parent):
         super(MainMenu, self).__init__(parent)
 
-        self.trainingList = ['Five Point', 'Random N']
+        self.trainingList = ['Pace', 'Dribble', 'Shooting', 'Passing', 'Defense', 'Physical']
 
         titleText = wx.StaticText(self, wx.ID_ANY,'Soccer Training Technology')
 
         nameText = wx.StaticText(self, wx.ID_ANY,'Enter Name : ')
-        self.nameInput = wx.TextCtrl(self, wx.ID_ANY, value='Enter Your Name ')
+        self.nameInput = wx.TextCtrl(self, wx.ID_ANY, value='John Doe')
 
         trainingText = wx.StaticText(self, wx.ID_ANY, 'Choose Training : ')
         self.trainingChoice = wx.Choice(self, choices = self.trainingList)
@@ -86,6 +93,7 @@ class MainMenu(wx.Panel):
         data = self.getData()
         msg = str('Hello ' + str(data[0]) + ', Your ' + str(data[1]) + ' training will begin shortly.')
         print( msg )
+        MyFrame.onSwitchPanels()
     
     def onExit(self,event):
 
@@ -116,7 +124,7 @@ class TrainingPanel(wx.Panel):
         length, height = img.shape[:2]
         parent.SetSize(length,height)
         img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-        self.bmp = wx.BitmapFromBuffer(length,height,img)
+        self.bmp = wx.Bitmap.FromBuffer(length,height,img)
 
         self.timer = wx.Timer(self)
         self.timer.Start(1000./60)
@@ -133,6 +141,9 @@ class TrainingPanel(wx.Panel):
         noBtn = wx.Button(self, wx.ID_ANY, 'No')
         self.Bind(wx.EVT_BUTTON, self.onNo, noBtn)
         
+        mainmenuBtn = wx.Button(self, wx.ID_ANY, 'Main Menu')
+        self.Bind(wx.EVT_BUTTON, self.onMM, mainmenuBtn)
+
         mainBox = wx.BoxSizer(wx.VERTICAL)
         titleBox = wx.BoxSizer(wx.HORIZONTAL)
         displayBox = wx.BoxSizer(wx.HORIZONTAL)
@@ -167,13 +178,13 @@ class TrainingPanel(wx.Panel):
     def nextFrame(self,event):
         ret, img = self.cam.read()
         if ret:
-            img = cv2.cvtColor(img, cv.COLOR_BGR2RGB)
+            img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
             self.bmp.CopyFromBuffer(img)
             self.Refresh()
 
+
     def onOK(self,event):
         #do something
-        
         return
 
     def onYes(self,event):
@@ -183,7 +194,9 @@ class TrainingPanel(wx.Panel):
     def onNo(self,event):
         #do something
         return
-            
+    
+    def onMM(self,event):
+        MyFrame.onSwitchPanels()
 
 app = MyApp()
 app.MainLoop()

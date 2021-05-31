@@ -25,7 +25,7 @@ import matplotlib as plt
 from PIL import Image
 import ArucoChecker as ac 
 import PoseEstimation as PE
-import 
+
 
 # video_pixels = (640,360) # the logitec and asus camera that is being used are using those resolutions
 # fps = 30
