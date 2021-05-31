@@ -13,8 +13,9 @@ class MyApp(wx.App):
 class MyFrame(wx.Frame):
     def __init__(self,parent,title):
         super(MyFrame, self).__init__(parent, title=title)
+        menupanel = MainMenu(self)
+        #tpanel = TrainingPanel(self)
 
-        panel = TrainingPanel(self)
 
 class MainMenu(wx.Panel):
     def __init__(self, parent):
