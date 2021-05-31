@@ -301,6 +301,7 @@ class ArucoChecker(object):
         # print('check point')
         if success:
             self._trf_mtx = trf_mtx
+            print(trf_mtx)
             return self._trf_mtx
             
         if not success:

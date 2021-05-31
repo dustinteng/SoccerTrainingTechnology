@@ -5,27 +5,34 @@ import numpy
 
 class MyApp(wx.App):
     def OnInit(self):
-        self.frame = MyFrame(parent = None, title = "Main Menu")
+        self._MM = MyFrameMainMenu()
+        self._TM = MyFrameTraining(self._MM)
         self.frame.Show()
 
         return True
 
-class MyFrame(wx.Frame):
-    def __init__(self,parent,title):
-        super(MyFrame, self).__init__(parent, title=title)
+class MyFrameMainMenu(wx.Frame):
+    #womdoawmoaodawd stuck hereeeeeeeeeeeeeeee
+    def __init__(self):
+        super(MyFrameMainMenu, self).__init__(parent = None, title= "Main Menu")
+        self._main_menu_panel = MainMenu(self)
 
-        panel = TrainingPanel(self)
+class MyFrameTraining(wx.Frame):
+    #womdoawmoaodawd stuck hereeeeeeeeeeeeeeee
+    def __init__(self, parent):
+        super(MyFrameTraining, self).__init__(parent = parent, title= "Training ")
+        self._training_panel = TrainingPanel(self)
 
 class MainMenu(wx.Panel):
     def __init__(self, parent):
         super(MainMenu, self).__init__(parent)
 
-        self.trainingList = ['Pace', 'Dribble', 'Shooting', 'Passing', 'Defense', 'Physical']
+        self.trainingList = ['Five Point', 'Random N']
 
         titleText = wx.StaticText(self, wx.ID_ANY,'Soccer Training Technology')
 
         nameText = wx.StaticText(self, wx.ID_ANY,'Enter Name : ')
-        self.nameInput = wx.TextCtrl(self, wx.ID_ANY, value='John Doe')
+        self.nameInput = wx.TextCtrl(self, wx.ID_ANY, value='Enter Your Name ')
 
         trainingText = wx.StaticText(self, wx.ID_ANY, 'Choose Training : ')
         self.trainingChoice = wx.Choice(self, choices = self.trainingList)

@@ -25,7 +25,7 @@ import matplotlib as plt
 from PIL import Image
 import ArucoChecker as ac 
 import PoseEstimation as PE
-
+import 
 
 # video_pixels = (640,360) # the logitec and asus camera that is being used are using those resolutions
 # fps = 30
@@ -40,7 +40,6 @@ randomN = '/RandomN'
 
 class STTDevelopment(object):
     def __init__(self):
-        self._data = []
         self._display = 'display://0'
         self._trf_mtx = None
         self._stopwatch = 0
