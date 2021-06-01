@@ -13,14 +13,38 @@ class MyApp(wx.App):
 class MyFrame(wx.Frame):
     def __init__(self,parent,title):
         super(MyFrame, self).__init__(parent, title=title)
-        menupanel = MainMenu(self)
-        #tpanel = TrainingPanel(self)
 
         self._mainmenu = MainMenu(self)
         self._trainingmenu = TrainingPanel(self)
         self._trainingmenu.Hide()
 
-    def onSwitchPanels(self, event):
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer.Add(self._mainmenu, 1, wx.EXPAND)
+        self.sizer.Add(self._trainingmenu, 1, wx.EXPAND)
+
+        self.Bind(wx.EVT_BUTTON, self.onEnter, self._mainmenu.trainingBtn)
+        self.Bind(wx.EVT_BUTTON, self.onMM, self._trainingmenu.mainmenuBtn)
+
+    def onMM(self,event):
+        self.onSwitchPanels()
+
+    def getData(self):
+
+        data = []
+        data.append(self._mainmenu.nameInput.GetValue())
+        selection = self._mainmenu.trainingChoice.GetSelection()
+        data.append(self._mainmenu.trainingChoice.GetString(selection)) 
+
+        return data
+
+    def onEnter(self,event):
+
+        data = self.getData()
+        msg = str('Hello ' + str(data[0]) + ', Your ' + str(data[1]) + ' training will begin shortly.')
+        print( msg )
+        self.onSwitchPanels()
+
+    def onSwitchPanels(self):
         """"""
         if self._mainmenu.IsShown():
             self.SetTitle("Training Menu Showing")
@@ -45,8 +69,7 @@ class MainMenu(wx.Panel):
 
         trainingText = wx.StaticText(self, wx.ID_ANY, 'Choose Training : ')
         self.trainingChoice = wx.Choice(self, choices = self.trainingList)
-        trainingBtn = wx.Button(self, wx.ID_ANY, 'Enter')
-        self.Bind(wx.EVT_BUTTON, self.onEnter, trainingBtn)
+        self.trainingBtn = wx.Button(self, wx.ID_ANY, 'Enter')
 
         settingsBtn1 = wx.Button(self, wx.ID_ANY, 'Calibrate')
         self.Bind(wx.EVT_BUTTON, self.onCalibrate, settingsBtn1)
@@ -66,7 +89,7 @@ class MainMenu(wx.Panel):
 
         trainingBox.Add(trainingText, 0 , wx.ALL, 5)
         trainingBox.Add(self.trainingChoice, 0 , wx.ALL, 5)
-        trainingBox.Add(trainingBtn, 0 , wx.ALL, 5)
+        trainingBox.Add(self.trainingBtn, 0 , wx.ALL, 5)
 
         settingsBox.Add(settingsBtn1, 0 , wx.ALL, 5)
         settingsBox.Add(settingsBtn2, 0 , wx.ALL, 5)
@@ -77,25 +100,10 @@ class MainMenu(wx.Panel):
         mainBox.Add(trainingBox, 0, wx.ALL|wx.EXPAND)
         mainBox.Add(settingsBox, 0, wx.CENTER)
 
+        
         self.SetSizer(mainBox)
         mainBox.Fit(self)
         self.Layout()
-
-    def getData(self):
-
-        data = []
-        data.append(self.nameInput.GetValue())
-        selection = self.trainingChoice.GetSelection()
-        data.append(self.trainingChoice.GetString(selection)) 
-
-        return data
-
-    def onEnter(self,event):
-
-        data = self.getData()
-        msg = str('Hello ' + str(data[0]) + ', Your ' + str(data[1]) + ' training will begin shortly.')
-        print( msg )
-        MyFrame.onSwitchPanels()
     
     def onExit(self,event):
 
@@ -120,6 +128,7 @@ class TrainingPanel(wx.Panel):
 
         titleText = wx.StaticText(self, wx.ID_ANY, 'Pace Training')
 
+        '''
         self.cam = cv.VideoCapture(0)
         ret, img = self.cam.read()
 
@@ -129,10 +138,11 @@ class TrainingPanel(wx.Panel):
         self.bmp = wx.Bitmap.FromBuffer(length,height,img)
 
         self.timer = wx.Timer(self)
-        self.timer.Start(1000./60)
+        self.timer.Start(1000/60)
 
         self.Bind(wx.EVT_PAINT, self.onPaint)
-        self.Bind(wx.EVT_TIMER, self.nextFrame)
+        self.Bind(wx.EVT_TIMER, self.nextFrame)~
+        '''
 
         convoOutput = wx.StaticText(self, wx.ID_ANY,'Press OK to Begin')
         convoBtn = wx.Button(self, wx.ID_ANY, 'OK')
@@ -143,31 +153,29 @@ class TrainingPanel(wx.Panel):
         noBtn = wx.Button(self, wx.ID_ANY, 'No')
         self.Bind(wx.EVT_BUTTON, self.onNo, noBtn)
         
-        mainmenuBtn = wx.Button(self, wx.ID_ANY, 'Main Menu')
-        self.Bind(wx.EVT_BUTTON, self.onMM, mainmenuBtn)
+        self.mainmenuBtn = wx.Button(self, wx.ID_ANY, 'Main Menu')
 
         mainBox = wx.BoxSizer(wx.VERTICAL)
         titleBox = wx.BoxSizer(wx.HORIZONTAL)
-        displayBox = wx.BoxSizer(wx.HORIZONTAL)
+        #displayBox = wx.BoxSizer(wx.HORIZONTAL)
         convoBox = wx.BoxSizer(wx.HORIZONTAL)
         buttonBox = wx.BoxSizer(wx.HORIZONTAL)
 
         titleBox.Add(titleText, 0, wx.ALL, 5)
-
-        displayBox.Add(self.bmp, 0, wx.ALL, 5)
         
         convoBox.Add(convoOutput, 0, wx.ALL, 5)
         convoBox.Add(convoBtn, 0, wx.ALL, 5)
 
         buttonBox.Add(yesBtn, 0, wx.ALL, 5)
         buttonBox.Add(noBtn, 0, wx.ALL, 5)
+        buttonBox.Add(self.mainmenuBtn, 0, wx.ALL, 5)
 
         mainBox.Add(titleBox, 0, wx.CENTER)
         mainBox.Add(wx.StaticLine(self,), 0, wx.ALL|wx.EXPAND, 5)
-        mainBox.Add(displayBox, 0, wx.CENTER)
+        #mainBox.Add(self.bmp, 0, wx.CENTER)
         mainBox.Add(convoBox, 0, wx.CENTER)
         mainBox.Add(buttonBox, 0, wx.CENTER)
-
+        
         self.SetSizer(mainBox)
         mainBox.Fit(self)
         self.Layout()
@@ -196,9 +204,6 @@ class TrainingPanel(wx.Panel):
     def onNo(self,event):
         #do something
         return
-    
-    def onMM(self,event):
-        MyFrame.onSwitchPanels()
 
 app = MyApp()
 app.MainLoop()
