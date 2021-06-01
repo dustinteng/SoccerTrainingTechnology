@@ -40,7 +40,6 @@ randomN = '/RandomN'
 
 class STTDevelopment(object):
     def __init__(self):
-        self._data = []
         self._display = 'display://0'
         self._trf_mtx = None
         self._stopwatch = 0
