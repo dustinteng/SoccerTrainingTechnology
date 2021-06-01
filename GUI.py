@@ -15,7 +15,7 @@ class MyFrame(wx.Frame):
         super(MyFrame, self).__init__(parent, title=title)
 
         self._mainmenu = MainMenu(self)
-        self._trainingmenu = TrainingPanel(self)
+        self._trainingmenu = TrainingPanel(self)      
         self._trainingmenu.Hide()
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
@@ -121,29 +121,46 @@ class MainMenu(wx.Panel):
         print('Calibrating... ')
         print('Calibrating Complete!')
 
+class VideoPanel(wx.Panel):
+    def __init__(self,parent):
+        super(VideoPanel, self).__init__(parent)
 
-class TrainingPanel(wx.Panel):
-    def __init__(self, parent):
-        super(TrainingPanel, self).__init__(parent)
-
-        titleText = wx.StaticText(self, wx.ID_ANY, 'Pace Training')
-
-        '''
         self.cam = cv.VideoCapture(0)
         ret, img = self.cam.read()
 
-        length, height = img.shape[:2]
+        height, length = img.shape[:2]
+        self.length = length
+        self.height = height
         parent.SetSize(length,height)
         img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
         self.bmp = wx.Bitmap.FromBuffer(length,height,img)
 
         self.timer = wx.Timer(self)
-        self.timer.Start(1000/60)
+        self.timer.Start(int(1000/120))
 
         self.Bind(wx.EVT_PAINT, self.onPaint)
-        self.Bind(wx.EVT_TIMER, self.nextFrame)~
-        '''
+        self.Bind(wx.EVT_TIMER, self.nextFrame)
 
+    def onPaint(self,event):
+        dc = wx.BufferedPaintDC(self)
+        dc.DrawBitmap(self.bmp,0,0)
+
+    def nextFrame(self,event):
+        ret, img = self.cam.read()
+        if ret:
+            img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+            self.bmp.CopyFromBuffer(img)
+            self.Refresh()
+
+
+class TrainingPanel(wx.Panel):
+    def __init__(self, parent):
+        super(TrainingPanel, self).__init__(parent)
+
+        self.vid_frame = None
+
+        titleText = wx.StaticText(self, wx.ID_ANY, 'Pace Training')
+        
         convoOutput = wx.StaticText(self, wx.ID_ANY,'Press OK to Begin')
         convoBtn = wx.Button(self, wx.ID_ANY, 'OK')
         self.Bind(wx.EVT_BUTTON, self.onOK, convoBtn)
@@ -157,7 +174,7 @@ class TrainingPanel(wx.Panel):
 
         mainBox = wx.BoxSizer(wx.VERTICAL)
         titleBox = wx.BoxSizer(wx.HORIZONTAL)
-        #displayBox = wx.BoxSizer(wx.HORIZONTAL)
+        displayBox = wx.BoxSizer(wx.HORIZONTAL)
         convoBox = wx.BoxSizer(wx.HORIZONTAL)
         buttonBox = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -172,7 +189,7 @@ class TrainingPanel(wx.Panel):
 
         mainBox.Add(titleBox, 0, wx.CENTER)
         mainBox.Add(wx.StaticLine(self,), 0, wx.ALL|wx.EXPAND, 5)
-        #mainBox.Add(self.bmp, 0, wx.CENTER)
+        # mainBox.Add(vid_container_panel, -1, wx.CENTER)
         mainBox.Add(convoBox, 0, wx.CENTER)
         mainBox.Add(buttonBox, 0, wx.CENTER)
         
@@ -180,20 +197,14 @@ class TrainingPanel(wx.Panel):
         mainBox.Fit(self)
         self.Layout()
 
-    def onPaint(self,event):
-        dc = wx.BufferedPaintDC(self)
-        dc.DrawBitmap(self.bmp,0,0)
-
-
-    def nextFrame(self,event):
-        ret, img = self.cam.read()
-        if ret:
-            img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-            self.bmp.CopyFromBuffer(img)
-            self.Refresh()
-
-
     def onOK(self,event):
+
+        if self.vid_frame is not None:
+            self.vid_frame.Close()
+        
+        self.vid_frame = wx.Frame(None)
+        self.bmp = VideoPanel(self.vid_frame)
+        self.vid_frame.Show()
         #do something
         return
 
