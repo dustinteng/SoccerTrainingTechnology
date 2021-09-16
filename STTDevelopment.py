@@ -32,7 +32,7 @@ import PoseEstimation as PE
 # threshold = 20
 # c_time = 6 # calibration video record time
 
-# assessments
+# assessments parameters
 side_length = 140
 # assessment strings:
 five_point = '/FivePoint'
@@ -69,6 +69,7 @@ class STTDevelopment(object):
             print(xgame,ygame)
             
             doubled = False
+            ##### hey work on this wth is this forloop doing
             for i in range(len(self._targets)):
                 if (xgame == self._targets[i][0]) and (ygame == self._targets[i][1]):
                         doubled = True
