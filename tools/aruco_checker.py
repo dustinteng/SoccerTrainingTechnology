@@ -43,7 +43,6 @@ class ArucoChecker(object):
         
         # directory properties
         self._cur_dir = '/home/user/projects/JTX-STT/user_data'
-        
 
 
     # helper function

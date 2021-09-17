@@ -15,16 +15,12 @@
 import cv2
 # import jetson.inference
 # import jetson.utils
-import argparse
-import sys
 import os
 import time
 import json
 import numpy as np
-import matplotlib as plt
-from PIL import Image
-import ArucoChecker as ac 
-import PoseEstimation as PE
+import SoccerTrainingTechnology.tools.aruco_checker as ac
+import SoccerTrainingTechnology.tools.pose_estimation as pe
 
 
 # video_pixels = (640,360) # the logitec and asus camera that is being used are using those resolutions
@@ -38,8 +34,9 @@ side_length = 140
 five_point = '/FivePoint'
 randomN = '/RandomN'
 
+
 class STTDevelopment(object):
-    def __init__(self):
+    def __init__(self) -> None:
         self._display = 'display://0'
         self._trf_mtx = None
         self._stopwatch = 0
@@ -62,7 +59,7 @@ class STTDevelopment(object):
         text = 'Center'
         self._targets.append((0,0,text))
 
-        while (len(self._targets) != number): 
+        while (len(self._targets) != number):
             xgame = np.random.random_integers(-coefficient, coefficient)
             ygame = np.random.random_integers(-coefficient, coefficient)
             text = '('+ str(xgame) + str(ygame) + ')'
@@ -368,7 +365,7 @@ class STTDevelopment(object):
         self._finish = False
         # initializing user detection dependencies
         # ud = UserDetection()
-        pe = PE.PoseEstimation()
+        post = pe.PoseEstimation()
         # starting time count
         os.system('cls' if os.name == 'nt' else 'clear')
         # menu
@@ -391,7 +388,7 @@ class STTDevelopment(object):
                         else:
                             self._stopwatch = round(time.time() - time_start, 2)
 
-                        success, data, img= pe.loop_function(self._stopwatch) 
+                        success, data, img= post.loop_function(self._stopwatch)
                         if success == True:
                             # warping to real life mapping
                             stt.warping(data)
