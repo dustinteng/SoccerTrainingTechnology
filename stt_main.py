@@ -53,6 +53,7 @@ class STTDevelopment(object):
         self._ass_no = 1
         self._cur_dir = os.getcwd() + '/user_data'
     # assessments
+
     def assessment_RandomN(self, number = 8):
         coefficient = side_length/2
         self._targets = []
