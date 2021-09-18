@@ -3,15 +3,16 @@
     1. MAE 199 - Spring 2021 with prof Jack Silberman and prof Mauricio de Oliveira
     2. Triton AI - STT 
 
-    sttDevelopment.py 
+    stt_main.py 
     1. checks boundary area using arucoChecker.py
     2. detect user and using homogeneity to transforms it's location.
 
-
-    device: Jetson Xavier NX
+    camera: Logitec HD Pro Webcam C920 (mtx and dist are calibrated)
+    device: X86 NVIDIA GTX 2070 Super running on linux
+    
     creator: Jan Dustin Tengdyantono
 '''
-
+from config_dir import config
 import cv2
 # import jetson.inference
 # import jetson.utils
@@ -37,9 +38,9 @@ randomN = '/RandomN'
 
 class STTDevelopment(object):
     def __init__(self) -> None:
-        self._display = 'display://0'
+        self._display = config.MAIN_DISPLAY
         self._trf_mtx = None
-        self._stopwatch = 0
+        self._stopwatch = config.MAIN_STOPWATCH
         self._data_JSON = []
         self._targets = [(0,0,'center')]
         self._check = False
@@ -52,6 +53,7 @@ class STTDevelopment(object):
         self._assessment = None
         self._ass_no = 1
         self._cur_dir = os.getcwd() + '/user_data'
+        self._device = "linux laptop"
     # assessments
 
     def assessment_RandomN(self, number = 8):
@@ -154,7 +156,7 @@ class STTDevelopment(object):
             "userID" : self._userID,
             "task_archetype": self._assessment,
             "task_archetype_number": self._ass_no,
-            "device": device,
+            "device": self._device,
             "calibration":self._cal_json,
             "data": data
         }

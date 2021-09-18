@@ -1,20 +1,5 @@
-''' This file is 2/3 of 
-    the Soccer Training Technology's developed at UCSD for 
-    1. MAE 199 - Spring 2021 with prof Jack Silberman and prof Mauricio de Oliveira
-    2. Triton AI - STT 
-
-    aruco_checker.py
-    check area play boundary using
-    camera: Logitec HD Pro Webcam C920 (mtx and dist are calibrated)
-    device: X86 NVIDIA GTX 2070 Super running on linux
-
-    This file deals with 
-    1. area bound reading
-    2. averaging plane transformation matrix
-    3. saving matrix transformation data to a JSON file
-
-    creator: Jan Dustin Tengdyantono
-    maintainer: Jan, Jonathan
+''' 
+saving the file for the sake of re-using the code
 '''
 
 import cv2
@@ -25,7 +10,8 @@ import json
 from config_dir import config
 
 # constants
-a_width, a_height = config.AREA_WIDTH, config.AREA_WIDTH  #2D warped 
+a_width, a_height = 360,360 #2D warped 
+local_counter_max = 100
 
 class ArucoChecker(object):
     def __init__(self):
@@ -41,37 +27,44 @@ class ArucoChecker(object):
         self._cal_time = config.ARUCO_TIMER
         # warping properties
         self._trf_mtx = None
+        
+        # directory properties
+        self._cur_dir = '/home/user/projects/JTX-STT/user_data'
+
 
     # helper function
     def camera_check(self):
-        ''' Camera Check Function.
-
-            Display real time camera feed to help with the calibration
-
-            params : None
+        '''
+            Display real time camera frame
+            params : camera-path string
             return : None
         '''
         # Create an object to read from camera
         video = cv2.VideoCapture(self._cam_path)
         # We need to check if camera is opened previously or not
         if (video.isOpened() == False): 
-            print(config.S_ERR_VIDEO)
-            
-        print(config.S_CAMERA_POS_CHECK)
+            print("Error reading video file")
+        # We need to set resolutions. so, convert them from float to integer.
+        # frame_width = int(video.get(3))
+        # frame_height = int(video.get(4))
+        # size = (frame_width, frame_height)      
+        # fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        # result = cv2.VideoWriter('display://0', fourcc , fps , size)
+        print(" the camera can't see every aruco markers, please adjust the camera")
+        print(" if camera is in position, press q to continue ")
         while(video.isOpened):
             ret, frame = video.read()
             if ret == True:
-    
+                # result.write(frame)
                 cv2.imshow('Calibration Frames', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
-    # helper function #1: 
+    # functions: AruCo markers 1/3 ( runs after recording video )
     def detecting_markers_location(self, image):
         ''' Detecting all Aruco Markers Locations and depicting each markers capability per frame
 
             Using CV2, the ArUco markers are used as reference for the area bound (assessment area)
-            this helper function is used by the area_calibraion_run function
 
             param <np array> image: image (per frame)
             returns :  boolean, tvecs, ids, marked_image
@@ -100,50 +93,58 @@ class ArucoChecker(object):
             y = int(y)
             image_area_marked = cv2.putText(img=image_copy, text="id = {0:d}".format(ids[i][0]), org=(x,y), fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=2, color=(0, 0, 255), thickness=2)
 
-        return ids, markers, image_area_marked 
-
-    # helper function #2: 
-    def warp_markers(self, image, images_count, ids, markers):
-        ''' checking detected markers and warp it 
-            
-            when all aruco markers are obtained inside a frame, the data will then be appended.
-            this helper function is used by the area_calibraion_run function
-
-            param [np array] image : current image
-            param int images_count : non-faulty images count
-            returns float array : location of each inner verteces - markers are not included to the frame
+        return True, tvecs, ids, image_area_marked 
+    # functions: AruCo markers 2/3 ( runs after recording video )
+    def warp_markers(self, image, images_count):
+        ''' 
+            checking detected markers 
+            args: 	image = current image
+                    ids = what are the id's visible
+                    images_count = non-faulty images
+            returns: location of each inner verteces - markers are not included to the frame
             
         '''
         X = False
+        images_count = images_count
+        local_counter = 0
         try:
+            markers, ids, rejected = cv2.aruco.detectMarkers(image=image, dictionary = self._cal_dict, cameraMatrix = self._mtx, distCoeff = self._dist)
             mark1 = np.where(ids == [1])[0][0]
             mark2 = np.where(ids == [2])[0][0]
             mark3 = np.where(ids == [3])[0][0]
             mark4 = np.where(ids == [4])[0][0]
-
-            # X is True when all aruco markers are detected properly
+            # mark5 = np.where(ids == [5])[0][0]
             X = True
+
         except IndexError:
             print("one or more markers are not detected")
+            
+        local_counter += 1
 
         if X == True:
             one = np.float32(markers[mark1][0][2])
             two = np.float32(markers[mark2][0][3])
             three = np.float32(markers[mark3][0][1])
             four = np.float32(markers[mark4][0][0])
-
+            # xarray = []
+            # yarray = []
+            # for i in range(4):
+            #     five = np.float32(markers[mark5][0][i])
+            #     xarray.append(five[0])
+            #     yarray.append(five[1])
+            # midx = np.average(xarray)
+            # midy = np.average(yarray)
             data = [one,two,three,four,images_count]
+            # mid = np.asarray([midx,midy])
             return X, data
         else:
             data = [0,0,0,0,0]
             return X, data
-
-    # functions: calibration run that calls helper function #1 and #2
+    # functions: AruCo markers 3/3 ( runs after recording video )
     def area_calibration_run(self, frames):
-        ''' calibration run that calls function detecting_markers_location and warp_markers
-
+        '''
             checking play area boundary by averaging the location of the markers
-            uses both detecting_markers_location and warp_markers functions
+            uses both detecting_markers_location and area_bound_locations functions
 
             args: frames
 
@@ -154,47 +155,48 @@ class ArucoChecker(object):
         two = []
         three = []
         four = []
-
+        # five = []
         images_count = 0
-        cal_frame_trgt = config.ARUCO_CALIBRATION_FRAME_TARGET
+        cal_frame_trgt = 10
         # checking detected markers and averaging the locations
         for n in range(N):
             if images_count < cal_frame_trgt:
-                image = frames[n]
-                
+                frame = frames[n]
+                image = frame
+                # image = cv2.flip(image,1) #do not use this, aruco can't be read and stuffs will then get hard.
                 #detecting area bound
-                ids, markers, image_area_marked = self.detecting_markers_location(image) #1
-                success, data = self.warp_markers(image, images_count, ids, markers) #2
+                naeloob, tvecs, ids, image_area_marked = self.detecting_markers_location(image)
+                success, data = self.warp_markers(image, images_count)
                 if success == True:
                     one.append(data[0])
                     two.append(data[1])
                     three.append(data[2])
                     four.append(data[3])
+                    # five.append(mid) #change this later
                     images_count = data[4] + 1 #checking image count for average geometric translation matrix
         print(str(images_count) + ' stable images')
-
-        # error checking if the camera can detect all bourdaries {target} times
+        # error checking if the camera can detect all bourdaries
         if images_count == cal_frame_trgt :
-        
         # averaging the location of each markers
             loc_one = np.float32(sum(one)/len(one))
             loc_two = np.float32(sum(two)/len(two))
             loc_three = np.float32(sum(three)/len(three))
             loc_four = np.float32(sum(four)/len(four))
+            # loc_mid = np.float32(sum(five)/len(five))
 
             # perspective transformation
             point2 = np.float32([[0,0],[a_width,0],[0,a_height],[a_width,a_height]])
             point1 = np.float32([loc_one,loc_two,loc_three,loc_four])
             matrix = cv2.getPerspectiveTransform(point1,point2)
             image_warped = cv2.warpPerspective(image,matrix,(a_width,a_height))
-            
             # show ArUco markers area boundary
-            print(' Transformation Matrix:', matrix)
-            
-            #showing area from #helper1
+            print(' Transformation Matrix:')
+            print(matrix)
             image = image_area_marked
+            #print(type(image_warped))
+            #showing area
             cv2.imshow("Area Calibration", image)
-            # showing warped images 
+            # showing warped images
             cv2.imshow("Warped", image_warped)
             success = True 
             time.sleep(2)
@@ -202,7 +204,7 @@ class ArucoChecker(object):
             return matrix, success
         
         if images_count < cal_frame_trgt :
-            print(config.S_NOT_SUCCESS_CAL_ARUCO)
+            ('not successfully calibrating play area')
             success = False
             matrix = None
             return matrix, success
@@ -210,22 +212,30 @@ class ArucoChecker(object):
 
     # functions: record video 
     def record_calibration_video(self):
-        '''  recording calibration video and save it to a variable
-        
-        appending frames to cal_frame variable - heap memory allocation
-        did this in order to boost efficiency
-
-        updating class variable self._cal_frames to be used on other function
-
-        param string input_URI : camera path
-        return: None
-        
+        ''' 
+        appending frames a variable - heap memory allocation
+        params: input_URI - camera path
+        returns: None
         '''
-        
+        ############## check again after making folders
+        # if not os.path.isdir(self._cur_dir):
+        #     print("folder " + folder + ' is not detected')
+        #     print("Creating folder")
+        #     os.mkdir(folder)
+        # Create an object to read from camera
+
         video = cv2.VideoCapture(self._cam_path)
         # We need to check if camera is opened previously or not
         if (video.isOpened() == False): 
             print("Error reading video file")
+
+        # check video resolution
+        # frame_width = int(video.get(3))
+        # frame_height = int(video.get(4))
+
+        # initializing frames video writer 
+        # fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        # result = cv2.VideoWriter(calibration_URI, fourcc , fps , size)
 
         # create start time and frame counter
         time_start = time.time()
@@ -236,6 +246,8 @@ class ArucoChecker(object):
             if ret == True:
                 # result.write(frame)
                 self._cal_frames.append(frame)
+                # Display the frame saved in the file
+                # cv2.imshow('Frame', frame)
                 delta_t = time_now - time_start
                 # break after 
                 if delta_t > self._cal_time and cv2.waitKey(1):
@@ -250,13 +262,8 @@ class ArucoChecker(object):
 
 
     def calibrate_JSON(self):
-        ''' creating a JSON ArUco calibration file :
-
+        '''
             adding calibration data to be saved later on
-
-            param : None
-            return : saving calibration data as JSON file
-            
         '''
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
@@ -270,14 +277,12 @@ class ArucoChecker(object):
         return data
 
     def ArUco_main(self):
-        ''' ArUco calibration main file
-
+        ''' 
             checking area bound by checking ArUco markers
-            
-            param: None (initiated) 
-            return: Transformation Matrix
+            mtx - camera matrix model: logitec
 
         '''
+
         self.record_calibration_video()
 
         ######################################
@@ -290,7 +295,6 @@ class ArucoChecker(object):
             return self._trf_mtx
             
         if not success:
-            print(config.S_ADJUST_CAMERA)
             self.camera_check()
             self.ArUco_main()
         
