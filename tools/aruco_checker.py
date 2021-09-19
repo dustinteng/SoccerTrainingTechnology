@@ -25,7 +25,7 @@ import json
 from config_dir import config
 
 # constants
-a_width, a_height = config.AREA_WIDTH, config.AREA_WIDTH  #2D warped 
+a_width, a_height = config.AREA_WIDTH, config.AREA_HEIGHT  #2D warped 
 
 class ArucoChecker(object):
     def __init__(self):
