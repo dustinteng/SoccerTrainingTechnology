@@ -53,21 +53,23 @@ class PoseEstimation(object):
         assert (self._dataset == 'BottomUpCocoDataset')
 
     def cap_is_opened(self):
-        '''  check if video capture is opened
+        """check if camera is currently active 
     
             param None
             return: bool
-        
-        '''
+        """
         return self._cap.isOpened()
 
     def loop_function(self, stopwatch):
-        ''' Pose Estimation loop function that checks each frame
+        """ Pose Estimation loop function that checks each frame's feed
             
             runs pose estimation and store the data into a variable that will be used in stt_main.py
 
-            returns: bool_cam, bool_data, self._data, self._img
-        '''
+            returns:    bool_cam (if camera is providing feed), 
+                        bool_data, 
+                        self._data, 
+                        self._img
+        """
 
         #  valiable initialization
         l_ankle = None
@@ -103,10 +105,8 @@ class PoseEstimation(object):
             # if self._show:
             #     cv2.imshow('frames', self._vis_img)
             
-            # print(pose_results)
-            # the length of the list is the number of people (P
+            # print(pose_results) - the length of the list is the number of people 
             if len(pose_results) > 0:
-                # print('masuk')
                 if len(pose_results[0]) > 0 and len(pose_results[0]['keypoints']) > 0:
                     l_ankle = pose_results[0]['keypoints'][15]
                     r_ankle = pose_results[0]['keypoints'][16]
@@ -120,7 +120,7 @@ class PoseEstimation(object):
                 r_ankle_y = r_ankle[1]
                 r_ankle_s = r_ankle[2] # score
 
-                # check if data is correct
+                # check if data is correct (the location in pixel is greater than 0)
                 if l_ankle_x >=0 and l_ankle_y >= 0:
                     if r_ankle_x >=0 and r_ankle_y >= 0:
                         success = True
@@ -146,18 +146,16 @@ class PoseEstimation(object):
                                             "score": center_s 
                                         }
                                     }
-                                
-                        self._bool_data = True
                         
-                    return self._bool_cam, self._bool_data, self._data, self._vis_img
+                    return self._bool_cam, self._data, self._vis_img
 
                 else:
                     self._data = None
                     self._img = None
-                    return self._bool_cam, self._bool_data, self._data, self._vis_img
+                    return self._bool_cam, self._data, self._vis_img
         
 
             else:
-                return self._bool_cam, self._bool_data, self._data, self._vis_img
+                return self._bool_cam, self._data, self._vis_img
         else:
-            return self._bool_cam, self._bool_data, self._data, self._vis_img
+            return self._bool_cam, self._data, self._vis_img

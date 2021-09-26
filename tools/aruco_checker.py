@@ -4,7 +4,7 @@
     2. Triton AI - STT 
 
     aruco_checker.py
-    check area play boundary using
+    check area play boundary by detecting 4 ArUco markers on the floor to be recognized as the boundary
     camera: Logitec HD Pro Webcam C920 (mtx and dist are calibrated)
     device: X86 NVIDIA GTX 2070 Super running on linux
 
@@ -27,6 +27,7 @@ from config_dir import config
 # constants
 a_width, a_height = config.AREA_WIDTH, config.AREA_HEIGHT  #2D warped 
 
+
 class ArucoChecker(object):
     def __init__(self):
         # camera properties
@@ -44,13 +45,9 @@ class ArucoChecker(object):
 
     # helper function
     def camera_check(self):
-        ''' Camera Check Function.
-
+        """ 
             Display real time camera feed to help with the calibration
-
-            params : None
-            return : None
-        '''
+        """
         # Create an object to read from camera
         video = cv2.VideoCapture(self._cam_path)
         # We need to check if camera is opened previously or not
@@ -68,14 +65,14 @@ class ArucoChecker(object):
 
     # helper function #1: 
     def detecting_markers_location(self, image):
-        ''' Detecting all Aruco Markers Locations and depicting each markers capability per frame
+        """ Detecting all Aruco Markers Locations and depicting each markers capability per frame
 
             Using CV2, the ArUco markers are used as reference for the area bound (assessment area)
             this helper function is used by the area_calibraion_run function
 
-            param <np array> image: image (per frame)
-            returns :  boolean, tvecs, ids, marked_image
-        '''
+            :param <np array> image: image (per frame)
+            :returns:  boolean, tvecs, ids, marked_image
+        """
         # print(type(image))
         # image = Image.fromarray(np.array(image))
         
@@ -104,7 +101,7 @@ class ArucoChecker(object):
 
     # helper function #2: 
     def warp_markers(self, image, images_count, ids, markers):
-        ''' checking detected markers and warp it 
+        """ checking detected markers and warp it 
             
             when all aruco markers are obtained inside a frame, the data will then be appended.
             this helper function is used by the area_calibraion_run function
@@ -112,8 +109,8 @@ class ArucoChecker(object):
             param [np array] image : current image
             param int images_count : non-faulty images count
             returns float array : location of each inner verteces - markers are not included to the frame
-            
-        '''
+        """
+
         X = False
         try:
             mark1 = np.where(ids == [1])[0][0]
@@ -140,7 +137,7 @@ class ArucoChecker(object):
 
     # functions: calibration run that calls helper function #1 and #2
     def area_calibration_run(self, frames):
-        ''' calibration run that calls function detecting_markers_location and warp_markers
+        """ calibration run that calls function detecting_markers_location and warp_markers
 
             checking play area boundary by averaging the location of the markers
             uses both detecting_markers_location and warp_markers functions
@@ -148,7 +145,8 @@ class ArucoChecker(object):
             args: frames
 
             returns: transformation matrix
-        '''
+        """
+
         N = len(frames)
         one = []
         two = []
@@ -176,7 +174,7 @@ class ArucoChecker(object):
         # error checking if the camera can detect all bourdaries {target} times
         if images_count == cal_frame_trgt :
         
-        # averaging the location of each markers
+            # averaging the location of each markers
             loc_one = np.float32(sum(one)/len(one))
             loc_two = np.float32(sum(two)/len(two))
             loc_three = np.float32(sum(three)/len(three))
@@ -210,17 +208,16 @@ class ArucoChecker(object):
 
     # functions: record video 
     def record_calibration_video(self):
-        '''  recording calibration video and save it to a variable
+        """ recording camera frames append it to a list type variable
         
         appending frames to cal_frame variable - heap memory allocation
         did this in order to boost efficiency
 
-        updating class variable self._cal_frames to be used on other function
+        appending list type variable self._cal_frames
 
-        param string input_URI : camera path
         return: None
         
-        '''
+        """
         
         video = cv2.VideoCapture(self._cam_path)
         # We need to check if camera is opened previously or not
@@ -250,14 +247,12 @@ class ArucoChecker(object):
 
 
     def calibrate_JSON(self):
-        ''' creating a JSON ArUco calibration file :
+        """ creating a JSON ArUco calibration file :
 
             adding calibration data to be saved later on
 
-            param : None
             return : saving calibration data as JSON file
-            
-        '''
+        """
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
         # trf_mtx = self._trf_mtx.tolist()
@@ -270,14 +265,14 @@ class ArucoChecker(object):
         return data
 
     def ArUco_main(self):
-        ''' ArUco calibration main file
+        """ This Function executes boundary area calibration
 
-            checking area bound by checking ArUco markers
-            
-            param: None (initiated) 
+            checking area bound by detecting 4 ArUco markers on the floor
+
             return: Transformation Matrix
-
-        '''
+        """
+            
+        
         self.record_calibration_video()
 
         ######################################
