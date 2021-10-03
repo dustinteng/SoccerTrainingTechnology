@@ -3,15 +3,16 @@
     1. MAE 199 - Spring 2021 with prof Jack Silberman and prof Mauricio de Oliveira
     2. Triton AI - STT 
 
-    sttDevelopment.py 
+    stt_main.py 
     1. checks boundary area using arucoChecker.py
     2. detect user and using homogeneity to transforms it's location.
 
-
-    device: Jetson Xavier NX
+    camera: Logitec HD Pro Webcam C920 (mtx and dist are calibrated)
+    device: X86 NVIDIA GTX 2070 Super running on linux
+    
     creator: Jan Dustin Tengdyantono
 '''
-
+from config_dir import config
 import cv2
 # import jetson.inference
 # import jetson.utils
@@ -21,6 +22,7 @@ import json
 import numpy as np
 import SoccerTrainingTechnology.tools.aruco_checker as ac
 import SoccerTrainingTechnology.tools.pose_estimation as pe
+import SoccerTrainingTechnology.tools.assessment as ass
 
 
 # video_pixels = (640,360) # the logitec and asus camera that is being used are using those resolutions
@@ -35,11 +37,11 @@ five_point = '/FivePoint'
 randomN = '/RandomN'
 
 
-class STTDevelopment(object):
+class stt_main(object):
     def __init__(self) -> None:
-        self._display = 'display://0'
+        self._display = config.MAIN_DISPLAY
         self._trf_mtx = None
-        self._stopwatch = 0
+        self._stopwatch = config.MAIN_STOPWATCH
         self._data_JSON = []
         self._targets = [(0,0,'center')]
         self._check = False
@@ -52,60 +54,7 @@ class STTDevelopment(object):
         self._assessment = None
         self._ass_no = 1
         self._cur_dir = os.getcwd() + '/user_data'
-    # assessments
-    def assessment_RandomN(self, number = 8):
-        coefficient = side_length/2
-        self._targets = []
-        text = 'Center'
-        self._targets.append((0,0,text))
-
-        while (len(self._targets) != number):
-            xgame = np.random.random_integers(-coefficient, coefficient)
-            ygame = np.random.random_integers(-coefficient, coefficient)
-            text = '('+ str(xgame) + str(ygame) + ')'
-            print(xgame,ygame)
-            
-            doubled = False
-            ##### hey work on this wth is this forloop doing
-            for i in range(len(self._targets)):
-                if (xgame == self._targets[i][0]) and (ygame == self._targets[i][1]):
-                        doubled = True
-                if doubled == False:
-                    text = '(' + str(xgame) + ',' + str(ygame) +')'
-                    self._targets.append((xgame,ygame,text))
-
-        # print (self._targets)
-        # self._target_circle = plt.Circle((x,y), 1.5 , color='r',fill=False)
-        # #adding circle around the marker.
-        # ax.add_patch(cir)
-    def assessment_FivePoint(self, number = 5):
-        coefficient = side_length/2
-        self._targets = []
-        center = 'Center'
-        self._targets.append((0,0,center))
-
-        for i in range(number):
-            rand = np.random.random_integers(1, 4)
-            if rand == 1:
-                xgame = -coefficient
-                ygame = coefficient
-                text = 'Top - Left'
-            if rand == 2:
-                xgame = coefficient
-                ygame = coefficient
-                text = 'Top - Right'
-            if rand == 3:
-                xgame = -coefficient
-                ygame = -coefficient
-                text = 'Bottom - Left'
-            if rand == 4:
-                xgame = coefficient
-                ygame = -coefficient
-                text = 'Bottom - Right'
-            self._targets.append((xgame,ygame,text))
-            
-            self._targets.append((0,0,center))
-
+        self._device = "linux laptop"
 
     # helper functions
     def check_username(self):
@@ -153,7 +102,7 @@ class STTDevelopment(object):
             "userID" : self._userID,
             "task_archetype": self._assessment,
             "task_archetype_number": self._ass_no,
-            "device": device,
+            "device": self._device,
             "calibration":self._cal_json,
             "data": data
         }
@@ -334,11 +283,11 @@ class STTDevelopment(object):
         if mainmenu == '1':
             assessment_id = str(input("Please choose one of the assessments; \n1. Five Points \n2. Random N \n"))
             if assessment_id == '1':
-                self.assessment_FivePoint()
+                ass.assessment_FivePoint()
                 self._assessment = 'FivePoint'
 
             if assessment_id == '2':
-                self.assessment_RandomN()
+                ass.assessment_RandomN()
                 self._assessment = 'RandomN'
 
         elif mainmenu == '2':
@@ -418,6 +367,6 @@ class STTDevelopment(object):
         cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    stt = STTDevelopment()
+    stt = stt_main()
     ac = ac.ArucoChecker()
     stt.stt_main()
